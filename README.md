@@ -23,7 +23,8 @@ There may be incomplete features, bugs, and ongoing changes to the codebase. Con
    cd 6DOF
 
 2. **Install required dependencies:**
-   ```pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
 
 3. **Checkout the examples**
 
