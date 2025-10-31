@@ -1,4 +1,4 @@
-from pysim.Model import Airplane, FlightCondition
+from pysim.Model import Airplane, FlightCondition, Info
 import pickle
 
 
@@ -8,9 +8,10 @@ import pickle
 
 #The class to handle the simulation logic for the aircraft
 class Sim():
-    def __init__(self, airplane:Airplane, flightCond:FlightCondition):
+    def __init__(self, airplane:Airplane, flightCond:FlightCondition, info:Info):
         self.airplane = airplane
         self.flightCond = flightCond
+        self.info = info
 
 
 #________________________________________________________________________________________________________________________
