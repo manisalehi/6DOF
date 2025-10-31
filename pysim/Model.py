@@ -51,7 +51,9 @@ class Info():
     group_name:str="UNDEFINED", 
     names:list[str]=["UNDEFINED"], 
     date:str="UNDEFINED", 
-    description:str="UNDEFINED"
+    description:str="UNDEFINED",
+    flight_condition:str="UNDEFINED",
+    airplane_name:str="UNDEFINED"
 
 #________________________________________________________________________________________________________________________
 #                                           Aerodynamic and stability related classes
@@ -147,6 +149,7 @@ class FlightCondition():
 class Airplane():
     aero:Aero
     massprop: MassProperty
+    info:Info
     S:float             #Wing Area [m^2]
     AR:float            #Aspect Ratio
     c:float             #Mean Aerodynamic chord
