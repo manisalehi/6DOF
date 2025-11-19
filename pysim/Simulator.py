@@ -164,38 +164,14 @@ class Sim():
         results = {                            
             "times" : t_points,
             "states": X,
-            # "positions" : self.positionInertia(X, t_points, InitalPosition)
+            "positions" : self.positionInertia(X, t_points, InitalPosition)
         }
 
         return results, sol_long, sol_lat
     
     
-    #getting to the position of the airplane from the states and the time span
+    # Getting to the position of the airplane from the states and the time span
     def positionInertia(self, X:np.ndarray, t_points:np.ndarray, pos_inital = np.array([0,0,0])):
-
-        #Finding the coordinate transformation matrix from NED to body
-        def body2NEDMatrix(psi, phi, theta):
-            T_phi = np.array([
-                [1, 0, 0],
-                [0, cos(phi), -sin(phi)],
-                [0, sin(phi), cos(phi)]
-            ]) 
-
-            T_theta = np.array([
-                [cos(self.theta0 + theta), 0, sin(self.theta0 + theta)],
-                [0 , 1, 0],
-                [-sin(self.theta0 + theta), 0, cos(self.theta0 + theta)]
-            ])
-
-            T_psi = np.array([
-                [cos(psi), -sin(psi), 0],
-                [sin(psi), cos(psi), 0],
-                [0, 0, 1]
-            ])
-
-            return T_psi @ T_theta @ T_phi
-        
-        #Finding the position of the airplane at each point in time 
 
         # Step 1: Find the inital position
         pos = np.array([pos_inital])
@@ -203,12 +179,39 @@ class Sim():
         for i in range(len(t_points)-1):
 
             # Step 2: Find the velocities in NED
-            vel =  body2NEDMatrix(X[8, i], X[7, i] ,X[3, i]) * np.array([X[0, i], X[4 ,i], X[1, i]])
+            vel1 =  self.body2NEDMatrix(X[i ,8], X[i, 7] ,X[i, 3]) @ np.array([X[i, 0], X[i, 4], X[i, 1]])
+            vel2 =  self.body2NEDMatrix(X[i+1 ,8], X[i+1, 7] ,X[i, 3]) @ np.array([X[i+1, 0], X[i+1, 4], X[i+1, 1]])
 
-            # Step 3: Simply assume v = s/t and find the amount of displacment
-            pos = np.vstack([pos, vel * (t_points[i+1] - t_points[i])])
+            vel = (vel1 + vel2) / 2
+
+            # Step 3: Doing Trapeziod integration
+            pos = np.vstack([pos, pos[-1] + vel * (t_points[i+1] - t_points[i])])
 
         return pos
+
+
+    # 🌍Finding the coordinate transformation matrix from NED to body
+    def body2NEDMatrix(self, psi, phi, theta):
+        T_phi = np.array([
+            [1, 0, 0],
+            [0, cos(phi), -sin(phi)],
+            [0, sin(phi), cos(phi)]
+        ]) 
+
+        T_theta = np.array([
+            [cos(self.theta0 + theta), 0, sin(self.theta0 + theta)],
+            [0 , 1, 0],
+            [-sin(self.theta0 + theta), 0, cos(self.theta0 + theta)]
+        ])
+
+        T_psi = np.array([
+            [cos(psi), -sin(psi), 0],
+            [sin(psi), cos(psi), 0],
+            [0, 0, 1]
+        ])
+
+        return T_psi @ T_theta @ T_phi
+
     
 
 #________________________________________________________________________________________________________________________
