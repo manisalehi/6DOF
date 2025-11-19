@@ -4,6 +4,8 @@ from typing import Callable
 import numpy as np
 from math import cos, sin, tan
 from scipy.integrate import solve_ivp, odeint
+import sympy as sp
+from scipy.signal import ss2tf
 
 
 #________________________________________________________________________________________________________________________
@@ -80,6 +82,63 @@ class Sim():
             [0, 0],
         ])
 
+    #Finding and pretty printing all of the transfer functions
+    def getTF(self, var = "S"):
+        # Latitudal channel
+        num_lat_aileron, den_lat = ss2tf(self.A_lat, self.B_lat, np.eye(5), np.zeros((5,2)), input=0)
+        num_lat_rudder,  den_lat = ss2tf(self.A_lat, self.B_lat, np.eye(5), np.zeros((5,2)), input=1)
+
+        s = sp.Symbol("s")
+
+        states_lat     = ["v", "p", "r", "φ", "ψ"]
+        inputs_lat     = ["Aileron", "Rudder"]
+
+        for i, state in enumerate(states_lat):
+
+            # AILERON → state_i
+            num_coeffs = num_lat_aileron[i, :]
+            den_coeffs = den_lat
+            num_poly = sum(num_coeffs[w] * s**(len(num_coeffs)-w-1) for w in range(len(num_coeffs)))
+            den_poly = sum(den_coeffs[w] * s**(len(den_coeffs)-w-1) for w in range(len(den_coeffs)))
+            H = num_poly/den_poly
+            print(f"H_{state}_Aileron(s) = ")
+            sp.pprint(sp.Eq(sp.Function('H')(s), H))
+
+            # RUDDER → state_i
+            num_coeffs = num_lat_rudder[i, :]
+            num_poly = sum(num_coeffs[w] * s**(len(num_coeffs)-w-1) for w in range(len(num_coeffs)))
+            H = num_poly/den_poly
+            print(f"H_{state}_Rudder(s) = ")
+            sp.pprint(sp.Eq(sp.Function('H')(s), H))
+
+        print("-----------------------------------------------------------------------------------")
+
+        # Longitude channel
+        num_long_elevator, den_long = ss2tf(self.A_long, self.B_long, np.eye(4), np.zeros((4,2)), input=0)
+        num_long_rudder,  den_long = ss2tf(self.A_long, self.B_long, np.eye(4), np.zeros((4,2)), input=1)
+
+        s = sp.Symbol("s")
+
+        states_long     = ["u", "v", "q", "θ"]
+        inputs_long     = ["Elevator", "throttle"]
+
+        for i, state in enumerate(states_long):
+
+            # _Elevator → state_i
+            num_coeffs = num_long_elevator[i, :]
+            den_coeffs = den_long
+            num_poly = sum(num_coeffs[w] * s**(len(num_coeffs)-w-1) for w in range(len(num_coeffs)))
+            den_poly = sum(den_coeffs[w] * s**(len(den_coeffs)-w-1) for w in range(len(den_coeffs)))
+            H = num_poly/den_poly
+            print(f"H_{state}_Elevator(s) = ")
+            sp.pprint(sp.Eq(sp.Function('H')(s), H))
+
+            # _Throttle → state_i
+            num_coeffs = num_long_rudder[i, :]
+            num_poly = sum(num_coeffs[w] * s**(len(num_coeffs)-w-1) for w in range(len(num_coeffs)))
+            H = num_poly/den_poly
+            print(f"H_{state}_Throttle(s) = ")
+            sp.pprint(sp.Eq(sp.Function('H')(s), H))
 
 #________________________________________________________________________________________________________________________
 #                                            Linear simulation
