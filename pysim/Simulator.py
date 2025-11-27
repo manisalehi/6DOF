@@ -50,7 +50,7 @@ class Sim():
         self.A_long = np.array([
             [long_coff.X.u                                      , long_coff.X.w                                      , 0                                                  ,-9.81*cos(self.theta0)                  ],
             [long_coff.Z.u                                      , long_coff.Z.w                                      , flightCond.U0                                      ,-9.81*sin(self.theta0)                  ],
-            [(long_coff.M.u + long_coff.M.w_dot * long_coff.Z.u), (long_coff.M.w + long_coff.M.w_dot * long_coff.Z.w), (long_coff.M.q + long_coff.M.w_dot + flightCond.U0),-long_coff.M.w_dot*9.81*sin(self.theta0)], 
+            [(long_coff.M.u + long_coff.M.w_dot * long_coff.Z.u), (long_coff.M.w + long_coff.M.w_dot * long_coff.Z.w), (long_coff.M.q *( long_coff.M.w_dot + flightCond.U0)),-long_coff.M.w_dot*9.81*sin(self.theta0)], 
             [0                                                  , 0                                                  , 1                                                  , 0                                      ]
         ])
 

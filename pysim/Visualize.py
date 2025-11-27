@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
+from scipy.interpolate import make_interp_spline
 
 #________________________________________________________________________________________________________________________
 #                                            2D response visualizer
@@ -112,7 +113,28 @@ def Position2D(solution:dict[str, np.ndarray], title:str):
 
 
 #📈 Plotting the response of the system 📈
-def Position3D(solution:dict[str, np.ndarray], title:str = "3D Trajectory"):    
+def Position3D(solution:dict[str, np.ndarray], title:str = "3D Trajectory"):   
+
+    # Extract coarse data points
+    X = solution["positions"][:, 0]
+    Y = solution["positions"][:, 1]
+    Z = solution["positions"][:, 2]
+
+    # Create an array of indices corresponding to your data points
+    t = np.arange(len(X)) 
+
+    # Generate a new, dense array of 't' values for interpolation 
+    t_new = np.linspace(t.min(), t.max(), 500) 
+
+    # Create the Spline for each dimension (X, Y, Z)
+    spl_x = make_interp_spline(t, X, k=11) 
+    spl_y = make_interp_spline(t, Y, k=11)
+    spl_z = make_interp_spline(t, Z, k=11)
+
+    # Evaluate the smooth curves
+    X_smooth = spl_x(t_new)
+    Y_smooth = spl_y(t_new)
+    Z_smooth = spl_z(t_new) 
     
     # Create the 3D trajectory plot
     fig = go.Figure(
@@ -121,7 +143,7 @@ def Position3D(solution:dict[str, np.ndarray], title:str = "3D Trajectory"):
                 x = solution["positions"][:,0],
                 y = solution["positions"][:,1],
                 z = solution["positions"][:,2],
-                mode='lines+markers',   # shows both line + points
+                mode='lines',   # shows both line + points
                 line=dict(width=4),
                 marker=dict(size=3)
             )
@@ -139,7 +161,7 @@ def Position3D(solution:dict[str, np.ndarray], title:str = "3D Trajectory"):
     )
 
     fig.update_layout(
-        scene=dict(
+        scene=dict( 
             xaxis=dict(showbackground=True, showgrid=True, zeroline=False),
             yaxis=dict(showbackground=True, showgrid=True, zeroline=False),
             zaxis=dict(showbackground=True, showgrid=True, zeroline=False),
